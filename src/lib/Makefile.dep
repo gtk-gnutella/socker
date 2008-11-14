@@ -1,0 +1,4 @@
+compat.o: compat.c common.h config.h casts.h debug.h compat.h
+debug.o: debug.c common.h config.h casts.h debug.h compat.h
+socker.o: socker.c common.h config.h casts.h debug.h compat.h socker.h
+wrapper.o: wrapper.c config.h common.h casts.h debug.h compat.h socker.h

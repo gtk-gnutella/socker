@@ -1,0 +1,91 @@
+# You'll need a Bourne Shell, bash or ksh should work as well
+SHELL = /bin/sh
+
+CFLAGS += -fPIC
+AR ?= ar
+RANLIB ?= ranlib
+
+LIBSOCKER_VERSION=1
+LIBSOCKER_SONAME=libsocker.so.$(LIBSOCKER_VERSION)
+
+LIBSOCKER_WRAP_VERSION=1
+LIBSOCKER_WRAP_SONAME=libsocker_wrap.so.$(LIBSOCKER_WRAP_VERSION)
+
+LIBSOCKER_OBJECTS =	\
+	compat.o	\
+	debug.o		\
+	socker.o	\
+
+# Leave the above line empty
+
+LIBSOCKER_WRAP_OBJECTS =	\
+	compat.o		\
+	debug.o			\
+	wrapper.o		\
+
+# Leave the above line empty
+INCLUDES =	\
+	casts.h \
+	common.h \
+	compat.h \
+	debug.h \
+
+# Leave the above line empty
+
+all:	$(LIBSOCKER_OBJECTS) \
+	libsocker.a \
+	libsocker.so \
+	libsocker_wrap.so \
+	socker-config
+
+socker-config: socker-config.template
+	sed 's,@SOCKER_LIB_PATH@,$(library_dir),' socker-config.template |\
+	sed 's,@SOCKER_INCLUDE_PATH@,$(header_dir),' |\
+	sed 's,@SOCKER_VERSION@,$(LIBSOCKER_VERSION),' >$@ && \
+	chmod +x $@
+
+libsocker.a:	$(LIBSOCKER_OBJECTS)
+	$(AR) rcs $@ $(LIBSOCKER_OBJECTS) && $(RANLIB) $@
+
+libsocker.so:	$(LIBSOCKER_OBJECTS)
+	$(CC) \
+		-shared \
+		-Wl,-soname,$(LIBSOCKER_SONAME) \
+		-o $@ \
+		$(LIBSOCKER_OBJECTS)
+
+libsocker_wrap.so:	$(LIBSOCKER_WRAP_OBJECTS) libsocker.so
+	$(CC) \
+		-shared \
+		-lc \
+		$(link_libdl) \
+		-L. -lsocker \
+		-Wl,$(link_rpath)$(library_dir) \
+		-Wl,-soname,$(LIBSOCKER_WRAP_SONAME) \
+		-o $@ \
+		$(LIBSOCKER_WRAP_OBJECTS)
+
+clean:
+	rm -f -- \
+		$(LIBSOCKER_OBJECTS) \
+		libsocker.a \
+		libsocker.so \
+		$(LIBSOCKER_WRAP_OBJECTS) \
+		libsocker_wrap.so \
+		socker-config
+
+clobber: distclean
+
+distclean: clean
+
+install: all
+	mkdir -p "$(library_dir)" && \
+	cp libsocker.a "$(library_dir)" && \
+	cp libsocker.so "$(library_dir)/$(LIBSOCKER_SONAME)" && \
+	cp libsocker_wrap.so "$(library_dir)/$(LIBSOCKER_WRAP_SONAME)" && \
+	ln -sf "$(LIBSOCKER_SONAME)" "$(library_dir)/libsocker.so" && \
+	ln -sf "$(LIBSOCKER_WRAP_SONAME)" "$(library_dir)/libsocker_wrap.so" && \
+	mkdir -p "$(header_dir)" && \
+	cp socker.h "$(header_dir)/" && \
+	cp socker-config "$(bin_dir)/socker-config"
+
