@@ -1,3 +1,0 @@
-example.o: example.c
-main.o: main.c lib/common.h lib/config.h lib/casts.h lib/debug.h \
-  lib/compat.h lib/common.h static-config.h
