@@ -12,14 +12,12 @@ LIBSOCKER_WRAP_VERSION=1
 LIBSOCKER_WRAP_SONAME=libsocker_wrap.so.$(LIBSOCKER_WRAP_VERSION)
 
 LIBSOCKER_OBJECTS =	\
-	compat.o	\
 	debug.o		\
 	socker.o	\
 
 # Leave the above line empty
 
 LIBSOCKER_WRAP_OBJECTS =	\
-	compat.o		\
 	debug.o			\
 	wrapper.o		\
 
@@ -27,7 +25,6 @@ LIBSOCKER_WRAP_OBJECTS =	\
 INCLUDES =	\
 	casts.h \
 	common.h \
-	compat.h \
 	debug.h \
 
 # Leave the above line empty

@@ -30,22 +30,5 @@
 
 #include "common.h"
 
-const char *get_username(void);
-
-static inline bool
-is_temporary_error(int error)
-{
-  switch (error) {
-  case EAGAIN:
-#if defined(EWOULDBLOCK) && EAGAIN != EWOULDBLOCK
-  case EWOULDBLOCK:
-#endif /* EWOULDBLOCK != EAGAIN */
-  case EINTR:
-    return true;
-  default:
-    return false;
-  }
-}
-
 #endif /* COMPAT_HEADER_FILE */
 /* vi: set ai et ts=2 sts=2 sw=2 cindent: */

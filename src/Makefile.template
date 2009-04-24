@@ -16,7 +16,6 @@ LIB_SOURCES =	\
 # Leave the above line empty
 
 LIB_OBJECTS =	\
-	lib/compat.o	\
 	lib/debug.o	\
 
 # Leave the above line empty
@@ -24,7 +23,6 @@ LIB_OBJECTS =	\
 LIB_INCLUDES =	\
 	lib/casts.h \
 	lib/common.h \
-	lib/compat.h \
 	lib/config.h \
 	lib/debug.h \
 	lib/socker.h \

@@ -374,7 +374,6 @@ typedef uint64_t uintptr_t;
 #endif
   
 #include "debug.h"
-#include "compat.h"
 
 enum {
 #ifndef HAVE_SHUT_RD

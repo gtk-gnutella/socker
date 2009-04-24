@@ -26,43 +26,4 @@
  */
 
 #include "common.h"
-#include <pwd.h>
-
-const char *
-get_username(void)
-{
-  static const char *user;
-  static char *dbuf;
-  static uid_t uid;
-
-  if (user && getuid() != uid) {
-    user = NULL;
-    if (dbuf) {
-      free(dbuf);
-      dbuf = NULL;
-    }
-  }
-
-  if (!user) {
-    const struct passwd *pw;
-    static char user_buf[1024];
-
-    uid = getuid();
-    pw = getpwuid(uid);
-    if (!pw) {
-      return NULL;
-    }
-    if (strlen(pw->pw_name) < sizeof user_buf) {
-      strncpy(user_buf, pw->pw_name, sizeof user_buf);
-      user = user_buf;
-    } else {
-      user = dbuf = strdup(pw->pw_name);
-      if (!user) {
-	      return NULL;
-      }
-    }
-  }
-  return user;
-}
-
 /* vi: set ai et ts=2 sts=2 sw=2 cindent: */

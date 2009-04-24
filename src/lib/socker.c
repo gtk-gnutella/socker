@@ -28,6 +28,20 @@
 #include "common.h"
 #include "socker.h"
 
+static inline bool
+is_temporary_error(int error)
+{
+  switch (error) {
+  case EAGAIN:
+#if defined(EWOULDBLOCK) && EAGAIN != EWOULDBLOCK
+  case EWOULDBLOCK:
+#endif /* EWOULDBLOCK != EAGAIN */
+  case EINTR:
+    return true;
+  default:
+    return false;
+  }
+}
 
 #ifdef HAVE_MSGHDR_CONTROL
 static inline const struct cmsghdr *
