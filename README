@@ -36,7 +36,7 @@ You can change this by adding -DSOCKER_PATH_TO_CONFIG=\"/path/to/conf\"
 to the CFLAGS or CPPFLAGS environment variable. Note the escaped
 double-quotes.
 
-Another option is too use a static configuration. The above mentioned
+Another option is to use a static configuration. The above mentioned
 file will not be used then. To change the configuration it will be
 required to recompile socker. See src/main.c. The static configuration
 will be used if you add -DSOCKER_USE_STATIC_CONFIG to the CFLAGS or
@@ -103,8 +103,8 @@ The following shows an arbitrary example configuration:
 # with a backlash. However, it's easier to read if you use quotes
 # which is another way to escape characters. Quote characters can also
 # be escaped by a backslash if necessary. Line breaks cannot be
-# escaped though.
-# IPv4 and IPv6 address can be specified with an additional CIDR netmask.
+# escaped though. IPv4 and IPv6 addresses can be specified with an
+# additional CIDR netmask.
 
 # The first rules allow everybody to bind TCP and UDP sockets for
 # IPv4 and IPv6 on unprivileged ports. This is normally unnecessary
@@ -230,7 +230,8 @@ former version does not allow creating a socket and works only for bind
 requests as the protocol is unspecified.
 
 Sometimes applications do not even attempt to create a privileged socket
-when they're not started by root. In this case the wrapper won't work
+when they're not started by root. Others might insist on using
+privileged features like chroot(). In this case the wrapper won't work
 and the applications must be fixed.
 
 
@@ -245,4 +246,4 @@ necessary. config.sh utilizes a few standard Unix tools e.g., sed.
 
 
 Author: Christian Biere <christianbiere at gmx dot de>
-Last-Edited: 2008-11-14
+Last-Edited: 2009-04-20

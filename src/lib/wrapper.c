@@ -37,7 +37,8 @@
 #include <sys/wait.h>
 #include <dlfcn.h>
 
-int socket(int, int, int) __attribute__((alias ("socker_socket")));
+int socket(int, int, int)
+  __attribute__((alias ("socker_socket")));
 
 #ifdef HAVE_BIND_WITH_STRUCT_SOCKADDR
 int bind(int s, const struct sockaddr *, socklen_t)
@@ -49,6 +50,9 @@ int bind(int s, const void *, socklen_t)
 
 typedef void (*func_ptr)(void);
 
+static int socker_socket(int, int, int);
+static int socker_bind(int, const struct sockaddr *, socklen_t);
+
 static func_ptr
 socker_get_libc_symbol(const char *symbol)
 {
@@ -56,7 +60,7 @@ socker_get_libc_symbol(const char *symbol)
   static const func_ptr zero_func;
   func_ptr func = zero_func;
 
-#ifdef RTLD_NEXT
+#if defined(RTLD_NEXT)
   handle = RTLD_NEXT;
 #else /* !RTLD_NEXT */
   if (!handle) {
@@ -65,7 +69,12 @@ socker_get_libc_symbol(const char *symbol)
 #endif /* RTLD_NEXT */
 
   if (handle) {
-    func = dlsym(handle, symbol);
+    union {
+      func_ptr f;
+      const void *p;
+    } u;
+    u.p = dlsym(handle, symbol);
+    func = u.f;
     if (!func) {
       errno = ENOSYS;
     }
@@ -83,9 +92,16 @@ socker_real_socket(int domain, int type, int protocol)
   static socket_func_ptr func;
 
   if (!func) {
-    func = (socket_func_ptr) socker_get_libc_symbol("socket");
+#ifdef __NetBSD__
+    func = (socket_func_ptr) socker_get_libc_symbol("__socket30");
+#endif
+    if (!func) {
+      func = (socket_func_ptr) socker_get_libc_symbol("socket");
+    }
+    if (!func)
+      return -1;
   }
-  return func ? func(domain, type, protocol) : -1;
+  return func(domain, type, protocol);
 }
 
 static int
@@ -96,11 +112,13 @@ socker_real_bind(int s, const struct sockaddr *addr, socklen_t addr_len)
   
   if (!func) {
     func = (bind_func_ptr) socker_get_libc_symbol("bind");
+    if (!func)
+      return -1;
   }
-  return func ? func(s, addr, addr_len) : -1;
+  return func(s, addr, addr_len);
 }
 
-void (*
+static void (*
 set_signal(int signo, void (*handler)(int)))(int)
 {
   struct sigaction sa, osa;
@@ -224,8 +242,7 @@ socker_request_bind(int s, const char *addr, unsigned port)
   return -1;
 }
 
-
-int
+static int
 socker_socket(int domain, int type, int protocol)
 {
   int s;
@@ -237,7 +254,7 @@ socker_socket(int domain, int type, int protocol)
   return s;
 }
 
-int
+static int
 socker_bind(int s, const struct sockaddr *addr, socklen_t addr_len)
 {
   char addr_buf[256];

@@ -105,16 +105,29 @@ debug_assert(const struct assert_point *ap)
 #if defined(SOCKER_DEBUG)
   const char *sv[] = {
     "\nAssertion failure at ",
-    ap->file, ":",
-    ap->line, " (",
-    ap->func, "): ",
-    ap->expr, "\n"
+    NULL, /* ap->file */
+    ":",
+    NULL, /* ap->line */
+    " (",
+    NULL, /* ap->func */
+    "): ",
+    NULL, /* ap->expr */
+    "\n"
   };
-  struct iovec iov[ARRAY_LEN(sv)], *iov_ptr = iov;
+  struct iovec iov[ARRAY_LEN(sv)];
   unsigned i;
 
+  for (i = 0; i < ARRAY_LEN(iov); i++)
+  switch (i) {
+  case 1: sv[i] = ap->file; break;
+  case 3: sv[i] = ap->line; break;
+  case 5: sv[i] = ap->func; break;
+  case 7: sv[i] = ap->expr; break;
+  }
+
   for (i = 0; i < ARRAY_LEN(iov); i++) {
-    *iov_ptr++ = iov_from_string(sv[i]);
+    iov[i].iov_base = deconstify_char_ptr(sv[i]);
+    iov[i].iov_len = strlen(sv[i]);
   }
 
   (void) writev(STDERR_FILENO, iov, ARRAY_LEN(iov));
